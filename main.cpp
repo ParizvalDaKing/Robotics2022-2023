@@ -169,7 +169,7 @@ void opcontrol() {
   pros::Motor cata(9,pros::E_MOTOR_GEARSET_36);
   pros::Motor intake(8,pros::E_MOTOR_GEARSET_18);
   pros::ADIDigitalIn cataSwitch ('H');
-  //pros::c::adi_pin_mode('G', OUTPUT); 
+  pros::adi_pin_mode('G', OUTPUT); 
   bool L1pushed = false;
   int loopAttempts = 0;
   int cataSpeed = 0;
@@ -181,18 +181,17 @@ void opcontrol() {
     chassis.arcade_standard(ez::SINGLE);
     
     if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L1)) {
-        loopAttempts = 0;
-        while (!cataSwitch.get_value()) {
-          // move cata motor until switch is pressed
-          if(loopAttempts > 100) {
-            cataSpeed = cataSpeed-1;
-          }
-          cata = cataSpeed * -1;
-          if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_X)) {
-            break;
-          }
-          loopAttempts = loopAttempts+1;
+      loopAttempts = 0;
+      while (!cataSwitch.get_value()) {
+        if(loopAttempts > 100) {
+          cataSpeed = cataSpeed - 1;
         }
+        cata = cataSpeed * - 1;
+        if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_X)) {
+          break;
+        }
+        loopAttempts = loopAttempts+1;
+      }
       cata = 0;
       L1pushed = true;
     }
@@ -202,40 +201,27 @@ void opcontrol() {
     else {
       cata = 0;
     }
-    // if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L1)) {
-    //   while(!cataSwitch.get_value()) {
-    //     cata = 127;
-        
-    //   }
-    // }
-    // if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L2)) {
-    //   while(cataSwitch.get_value()) {
-    //     cata = 127;
-    //     if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_X)) {
-    //         break;
-    //     }
-    //   }
-    //   cata = 0;
-    //   //pros::delay(500);
-    // }
 
-      if(master.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
-      intake = 105;
-      }
-      else if(master.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
-        intake = -105;
-      }
-      else {
-        intake = 0;
-      }
-      pros::delay(ez::util::DELAY_TIME); // This is used for timer calculations!  Keep this ez::util::DELAY_TIMEoi
+    //INTAKE CONTROL
+    if(master.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
+    intake = 105;
+    }
+    else if(master.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
+      intake = -105;
+    }
+    else {
+      intake = 0;
+    }
+
+    //PNEUMATICS CONTROL
+    if(master.get_digital(pros::E_CONTROLLER_DIGITAL_A)) {
+      pros::adi_digital_write('G', HIGH);
+      //EXTEND
+    }
+    if(master.get_digital(pros::E_CONTROLLER_DIGITAL_B)) {
+      pros::adi_digital_write('G', LOW);
+      //RETRACT
+    }
+    pros::delay(ez::util::DELAY_TIME); // This is used for timer calculations!  Keep this ez::util::DELAY_TIMEoi
     }
   }
-    
-    // if(master.get_digital(pros::E_CONTROLLER_DIGITAL_A)) {
-    //   pros::c::adi_digital_write('G', HIGH);
-    // }
-    // if(master.get_digital(pros::E_CONTROLLER_DIGITAL_B)) {
-    //   pros::c::adi_digital_write('G', LOW);
-    // }
-    
