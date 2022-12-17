@@ -4,6 +4,7 @@
 #include "EZ-Template/util.hpp"
 #include "pros/adi.h"
 #include "pros/adi.hpp"
+#include "pros/ext_adi.h"
 #include "pros/misc.h"
 #include "pros/motors.h"
 #include "pros/motors.hpp"
@@ -34,7 +35,7 @@ Drive chassis (
 
   // Cartridge RPM
   //   (or tick per rotation if using tracking wheels)
-  ,200
+  ,600
 
   // External Gear Ratio (MUST BE DECIMAL)
   //    (or gear ratio of tracking wheel)
@@ -167,9 +168,9 @@ void opcontrol() {
 
   chassis.set_drive_brake(MOTOR_BRAKE_HOLD);
   pros::Motor cata(9,pros::E_MOTOR_GEARSET_36);
-  pros::Motor intake(8,pros::E_MOTOR_GEARSET_18);
+  pros::Motor intake(8,pros::E_MOTOR_GEARSET_06);
   pros::ADIDigitalIn cataSwitch ('H');
-  //pros::c::adi_pin_mode('G', OUTPUT); 
+  pros::c::adi_pin_mode('G', OUTPUT);
   bool L1pushed = false;
   int loopAttempts = 0;
   int cataSpeed = 0;
@@ -220,14 +221,21 @@ void opcontrol() {
     // }
 
       if(master.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
-      intake = 105;
+      intake = -100;
       }
       else if(master.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
-        intake = -105;
+        intake = 100;
       }
       else {
         intake = 0;
       }
+      if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_A)) {
+        pros::c::adi_digital_write('G', HIGH);
+      }
+      else if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_B)) {
+        pros::c::adi_digital_write('G', LOW);
+      }
+    
       pros::delay(ez::util::DELAY_TIME); // This is used for timer calculations!  Keep this ez::util::DELAY_TIMEoi
     }
   }
